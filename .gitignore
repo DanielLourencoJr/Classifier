@@ -1,0 +1,5 @@
+/target
+/data/mine/*
+/data/others/*
+/data/test
+/data/train
