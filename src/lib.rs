@@ -192,3 +192,53 @@ pub fn filter_vocabulary(count: HashMap<String, u32>, vocabulary: Vec<String>) -
 
     filtered_text
 }
+
+pub fn predict(text_count: HashMap<String, u32>, model: &TrainedModel) -> bool {
+    let filtered_text = filter_vocabulary(text_count, model.vocabulary.clone());
+
+    let mut mine_proximity: f64 = model.mine_prior.ln();
+
+    for (word, number) in filtered_text.clone() {
+        let mine_prob = model.mine_probs.get(&word).unwrap();
+        mine_proximity += (number as f64) * mine_prob.ln();
+    }
+
+    let mut others_proximity: f64 = model.others_prior.ln();
+
+    for (word, number) in filtered_text {
+        let others_prob = model.others_probs.get(&word).unwrap();
+        others_proximity += (number as f64) * others_prob.ln();
+    }
+
+    if mine_proximity > others_proximity{
+        true
+    } else {
+        false
+    }
+}
+
+pub fn test(model: TrainedModel) {
+    let my_files = list_files("data/test/mine");
+    let mut total = 0;
+    let mut success = 0;
+    for file in my_files {
+        let text_count = process_file(file);
+        let result = predict(text_count, &model);
+        total += 1;
+        if result {
+            success += 1;
+        }
+    }
+    let other_files = list_files("data/test/others");
+    for file in other_files {
+        let text_count = process_file(file);
+        let result = predict(text_count, &model);
+        total += 1;
+        if !result {
+            success += 1;
+        }
+    }
+    println!("Total: {}", total);
+    println!("Success: {}", success);
+    println!("Success rate: {}", success as f64 / total as f64)
+}
