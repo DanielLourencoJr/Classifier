@@ -227,6 +227,8 @@ pub fn test(model: TrainedModel) {
         total += 1;
         if result {
             success += 1;
+        } else {
+            println!("Mine confused as others'");
         }
     }
     let other_files = list_files("data/test/others");
@@ -236,6 +238,8 @@ pub fn test(model: TrainedModel) {
         total += 1;
         if !result {
             success += 1;
+        } else {
+            println!("Others' confused as mine");
         }
     }
     println!("Total: {}", total);
